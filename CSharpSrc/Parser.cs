@@ -23,7 +23,7 @@ namespace ConfigureParser
         private Parser(string code)
         {
             netCode = Parser.ReplaceLine(code);
-            headNode = Tokenize().Check().DoParse(3);
+            headNode = Tokenize().Check().DoParse(3); // 3 is the first element to parse
         }
 
         private Parser Tokenize()
@@ -218,6 +218,5 @@ namespace ConfigureParser
                 .Replace("\t", " ")
                 .Replace("\r", " ");
         }
-
     }
 }

@@ -38,6 +38,8 @@ namespace ConfigureParser
                 Trace.Assert(currentNode[0].Content == "AndYou");
                 Trace.Assert(currentNode[1].Content == "AndMe");
                 Trace.Assert(currentNode.ChildCount == 2);
+
+                t.EquipOperations();
             }
         }
     }

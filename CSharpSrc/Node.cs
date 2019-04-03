@@ -8,10 +8,14 @@ using System.Threading.Tasks;
 
 namespace ConfigureParser
 {
+
     public class Node : IEnumerable
     {
+        public delegate void TestOperation();
         public string Content { get; } // Content could be ""
+        public TestOperation TestStep { get; set; }
         public int ChildCount => _childNodes.Count; // Just read?
+
         private readonly List<Node> _childNodes;
 
         public Node(string content)
