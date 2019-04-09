@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,36 +10,38 @@ namespace ConfigureParser
 {
     class OperationTree
     {
-        private Tree _operationTree;
+        private readonly Tree _operationTree;
 
-        public OperationTree(string configureCode)
+        /// <param name="configureCode"></param>
+        /// <param name="asm">Specify a specific assembly file to load operation method. Default value is null</param>
+        public OperationTree(string configureCode, Assembly asm = null)
         {
-            _operationTree = Parser.Parse(configureCode).EquipOperations();
+            // TODO asm mechanism still has some error, ie. asm is not equal to Class name
+            _operationTree = Parser.Parse(configureCode).EquipOperations(asm);
             
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="destStep"></param>
+        /// <param name="destStep">Destination operation</param>
+        /// <param name="choiceArray">This array is to store the name of branch structure's choice, default value is null </param>
         /// <returns>The name of terminated step, if same to destStep, means successful</returns>
-        public string OperateTo(string destStep) // para type is not sure TODO
+        public void OperateTo(string destStep, List<string> choiceArray = null) // para type is not sure TODO
         {
-            var route = _operationTree.searchRoute(destStep);
-            if (route != null && route.Count != 0)
+            var route = _operationTree.SearchRoute(destStep, choiceArray);
+            foreach (var step in route)
             {
-                foreach (var step in _operationTree.searchRoute(destStep))
+                try
                 {
-                    step.TestStep(); // TODO　Check if have some problem
+                    step.TestStep();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Have problem in" + step.Content + ":" + e);
+                    throw;
                 }
             }
-            else
-            {
-                throw new Exception("Some wrong, please check");
-            }
-
-
-            return destStep;
         }
     }
 }

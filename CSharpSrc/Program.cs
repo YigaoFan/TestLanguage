@@ -12,6 +12,7 @@ namespace ConfigureParser
     {
         static void Main(string[] args)
         {
+            Log.WriteLine("HAHA");
             string code = null;
             try
             {
@@ -27,19 +28,22 @@ namespace ConfigureParser
 
             if (code != null)
             {
-                var t = Parser.Parse(code);
-                var currentNode = t.HeadNode;
-                Trace.Assert(t.Name == "Word");
-                Trace.Assert(currentNode.Content == "Hello");
-                currentNode = currentNode[0];
-                Trace.Assert(currentNode.Content == "World");
-                currentNode = currentNode[0];
-                Trace.Assert(currentNode.Content == "");
-                Trace.Assert(currentNode[0].Content == "AndYou");
-                Trace.Assert(currentNode[1].Content == "AndMe");
-                Trace.Assert(currentNode.ChildCount == 2);
+                //var t = Parser.Parse(code);
+                //var currentNode = t.HeadNode;
+                //Trace.Assert(t.Name == "Word");
+                //Trace.Assert(currentNode.Content == "Hello");
+                //currentNode = currentNode[0];
+                //Trace.Assert(currentNode.Content == "World");
+                //currentNode = currentNode[0];
+                //Trace.Assert(currentNode.Content == "");
+                //Trace.Assert(currentNode[0].Content == "AndYou");
+                //Trace.Assert(currentNode[1].Content == "AndMe");
+                //Trace.Assert(currentNode.ChildCount == 2);
+                //Debug.Assert();
 
-                t.EquipOperations();
+                var t = new OperationTree(code);
+                t.OperateTo("DoViewOption", new List<string> { "DoViewOption" });
+                Console.Read();
             }
         }
     }
