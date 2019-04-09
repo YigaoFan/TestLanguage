@@ -14,6 +14,7 @@ namespace ConfigureParser
         private readonly string _netCode;
         private List<Token> _tokenList;
         private readonly List<Node> _nodes = new List<Node>();
+        private Stack<Node> _nodeStack = new Stack<Node>();
 
         public static Tree Parse(string code)
         {
@@ -24,7 +25,7 @@ namespace ConfigureParser
         private Parser(string code)
         {
             _netCode = Parser.ReplaceLine(code);
-            _headNode = Tokenize().Check().DoParse(3); // 3 is the first element to parse
+            _headNode = Tokenize().Check().DoParseFrom(3); // 3 is the first element to parse
         }
 
         private Parser Tokenize()
@@ -124,7 +125,7 @@ namespace ConfigureParser
             return this;
         }
 
-        private Node DoParse(int i)
+        private Node DoParseFrom(int i)
         {
             int pairedOne;
             switch (_tokenList[i].Type)
@@ -137,7 +138,7 @@ namespace ConfigureParser
                     return ProcessSquareBracket(i, pairedOne);
                 default:
                     // TODO should declare NAME in the document
-                    throw new ArgumentException("Found the illegal element after the NAME");
+                    throw new ArgumentException("Illegal character was found after the NAME");
             }
         }
 
@@ -153,17 +154,21 @@ namespace ConfigureParser
                     _nodes.Add(n);
                     return n;
                 default: // like (()[])
-                    Node last;
-                    var first = last = DoParse(begin + 1);
+                    var first = DoParseFrom(begin + 1);
                     begin = FindPair(begin + 1);
 
                     while (begin < end - 1) // (()Z)
                     {
                         // there are some info lose between the two function
-                        n = DoParse(begin + 1);
-                        last.AddChild(n);
+                        n = DoParseFrom(begin + 1);
+
+                        while (_nodeStack.Count != 0) // TODO should be moved to a method?
+                        {
+                            _nodeStack.Pop().AddChild(n); // error TODO should before DoParseFrom? it will affect?
+                        }
+                        //last.AddChild(n);
                         // update
-                        last = n;
+                        //last = n;
                         begin = FindPair(begin + 1); // actually begin point to the last pair's end
                     }
                     return first; // or should return last
@@ -177,15 +182,27 @@ namespace ConfigureParser
                 case 1: // [] should in grammar check? TODO
                     throw new ArgumentException("The content between two paired bracket should not be empty");
                 case 2: // [word]
-                    return MakeNewNode(_tokenList[begin + 1].Content);
+                    return MakeNewNode(_tokenList[begin + 1].Content); // TODO should error?
                 default: // like [()[]]
-                    var n = MakeNewNode("");
+                    //var n = MakeNewNode("");
+                    var lastNodes = new List<Node>();
+                    while (_nodeStack.Count != 0)
+                    {
+                        lastNodes.Add(_nodeStack.Pop());
+                    }
+                    var lastNode = _nodeStack.Pop();
                     while (begin < end - 1) // [()]
                     {
-                        n.AddChild(DoParse(begin + 1));
+                        var n = DoParseFrom(begin + 1);
+
+                        foreach (var last in lastNodes)
+                        {
+                            last.AddChild(n); // TODO maybe occur some problem
+                        }
+
                         begin = FindPair(begin + 1); // actually begin point to the last pair's end
                     }
-                    return n;
+                    return lastNode;
             }
         }
 
@@ -219,6 +236,7 @@ namespace ConfigureParser
         {
             var n = new Node(content);
             _nodes.Add(n);
+            _nodeStack.Push(n);
             return n;
         }
 

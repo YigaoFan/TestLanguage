@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConfigureParser
 {
@@ -12,7 +8,6 @@ namespace ConfigureParser
     {
         static void Main(string[] args)
         {
-            Log.WriteLine("HAHA");
             string code = null;
             try
             {
@@ -42,7 +37,7 @@ namespace ConfigureParser
                 //Debug.Assert();
 
                 var t = new OperationTree(code);
-                t.OperateTo("DoViewOption", new List<string> { "DoViewOption" });
+                t.OperateTo("ViewAccount", new List<string> { "ViewAccount" });
                 Console.Read();
             }
         }

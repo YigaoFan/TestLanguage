@@ -16,8 +16,8 @@ namespace ConfigureParser
     {
         public delegate void TestOperation();
         public string Content { get; } // Content could be ""
-
         public TestOperation TestStep { get; set; } = () => { return; };
+        public bool Useful { get; } // Indicate it has no operation to do
 
         public int ChildCount => _childNodes.Count; // Just read?
 
@@ -28,6 +28,10 @@ namespace ConfigureParser
         {
             Content = content;
             _childNodes = new List<Node>();
+            if (content == "")
+            {
+                Useful = false;
+            }
         }
 
         public Node AddChild(Node node)

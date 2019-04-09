@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConfigureParser
 {
-    class OperationTree
+    public class OperationTree
     {
         private readonly Tree _operationTree;
 

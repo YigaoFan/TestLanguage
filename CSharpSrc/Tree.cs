@@ -112,7 +112,7 @@ namespace ConfigureParser
             var route = new List<Node>();
 
             var currentNode = HeadNode;
-            route.Add(currentNode);
+            Add(ref route, currentNode);
 
             if (currentNode.Content == destStep)
             {
@@ -145,7 +145,7 @@ namespace ConfigureParser
 
                 Add:
                 currentNode = currentNode[branchNum];
-                route.Add(currentNode);
+                Add(ref route, currentNode);
 
                 // check destination arrived
                 if (currentNode.Content == destStep)
@@ -155,6 +155,14 @@ namespace ConfigureParser
             }
 
             return route;
+        }
+
+        private static void Add(ref List<Node> route, Node newNode)
+        {
+            if (newNode.Useful)
+            {
+                route.Add(newNode);
+            }
         }
     }
 }
