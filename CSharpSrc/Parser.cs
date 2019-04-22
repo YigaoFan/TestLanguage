@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 
 namespace ConfigureParser
@@ -145,7 +147,7 @@ namespace ConfigureParser
                 case 1: // () should in grammar check? TODO
                     throw new ArgumentException("The content between two paired bracket should not be empty");
                 case 2: // (word)
-                    return new HeadTail(MakeNewNode(_tokenList[begin + 1].Content));
+                    return new HeadTail(MakeNode(_tokenList[begin + 1].Content));
                 default: // like (()[])
                     var e = FindPair(begin + 1);
                     var first = DoParseFrom(begin + 1, e);
@@ -178,8 +180,8 @@ namespace ConfigureParser
                 case 2: // [word]
                     throw new ArgumentException("The content between two paired bracket should not be just one word directly");
                 default: // like [()[]]
-                    var head = MakeNewNode("");
-                    var tail = MakeNewNode("");
+                    var head = MakeNode("");
+                    var tail = MakeNode("");
                     
                     while (begin < end - 1) // [()]
                     {
@@ -222,15 +224,26 @@ namespace ConfigureParser
             }
         }
 
-        private Node MakeNewNode(string content)
+        private Node MakeNode(string content)
         {
-            // use Linq to check if this content is existed in _node
-            var n = new Node(content);
+            var result = from n in _nodes where n.Content == content select n;
+
+            if (result.Count() == 1)
+            {
+                return result.First();
+            }
+            else if (result.Count() != 0)
+            {
+                // defense program
+                throw new Exception("There are some duplicate Node in _nodes, but I think this exception has no chance to throw");
+            }
+
+            var node = new Node(content);
             if (content != "")
             {
-                _nodes.Add(n);
+                _nodes.Add(node);
             }
-            return n;
+            return node;
         }
 
         private static string ReplaceLine(string code)

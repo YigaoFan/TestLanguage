@@ -24,8 +24,9 @@ namespace ConfigureParser
             _allNodeWithRealOperation = allNodeWithRealOperation;
         }
 
-        public Tree EquipOperations(Assembly asm = null) // reserved for future using
+        public Tree EquipOperations(out Type type, Assembly asm = null) // reserved for future using
         {
+            // todo because use the generic, maybe need to modify the code
             if (asm != null)
             {
                 // use asm to re-assign the type variable
@@ -43,7 +44,6 @@ namespace ConfigureParser
                             throw new ArgumentException("Can't find the method: " + node.Content);
                         }
 
-                        // TODO now is static method
                         node.TestStep = () => method.Invoke(null, null);
 
                     }
@@ -56,6 +56,8 @@ namespace ConfigureParser
                 }
                 //EquipRecursively(HeadNode);
             }
+
+            type = _type; // TODO maybe not should put here
             return this;
         }
 

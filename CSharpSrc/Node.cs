@@ -11,7 +11,7 @@ namespace ConfigureParser
     {
         public delegate void TestOperation();
         public string Content { get; } // Content could be ""
-        public TestOperation TestStep { get; set; } = () => { return; };
+        public TestOperation TestStep { get; set; } = null;
         public bool Useful { get; } // Indicate it has no operation to do
 
         public int ChildCount => _childNodes.Count; // Just read?
