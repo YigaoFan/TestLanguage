@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConfigureParser
 {
@@ -28,10 +23,7 @@ namespace ConfigureParser
         {
             Content = content;
             _childNodes = new List<Node>();
-            if (content == "")
-            {
-                Useful = false;
-            }
+            Useful = content != "";
         }
 
         public Node AddChild(Node node)

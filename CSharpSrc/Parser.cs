@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ConfigureParser
 {
@@ -13,8 +11,7 @@ namespace ConfigureParser
 
         private readonly string _netCode;
         private List<Token> _tokenList;
-        private readonly List<Node> _nodes = new List<Node>();
-        private Stack<Node> _nodeStack = new Stack<Node>();
+        private readonly List<Node> _nodes = new List<Node>(); // Convenient to equip operation, so just record the Not "" Node
 
         public static Tree Parse(string code)
         {
@@ -25,7 +22,7 @@ namespace ConfigureParser
         private Parser(string code)
         {
             _netCode = Parser.ReplaceLine(code);
-            _headNode = Tokenize().Check().DoParseFrom(3); // 3 is the first element to parse
+            _headNode = Tokenize().Check().DoParseFrom(3, FindPair(3)).Head; // 3 is the first element to parse
         }
 
         private Parser Tokenize()
@@ -125,84 +122,77 @@ namespace ConfigureParser
             return this;
         }
 
-        private Node DoParseFrom(int i)
+        /// <returns>The pair of head and tail of a linked list</returns>
+        private HeadTail DoParseFrom(int start, int end)
         {
-            int pairedOne;
-            switch (_tokenList[i].Type)
+            switch (_tokenList[start].Type)
             {
                 case TokenType.LeftBracket:
-                    pairedOne = FindPair(i, TokenType.RightBracket);
-                    return ProcessBracket(i, pairedOne);
+                    return ProcessBracket(start, end);
                 case TokenType.LeftSquareBracket:
-                    pairedOne = FindPair(i, TokenType.RightSquareBracket);
-                    return ProcessSquareBracket(i, pairedOne);
+                    return ProcessSquareBracket(start, end);
                 default:
                     // TODO should declare NAME in the document
                     throw new ArgumentException("Illegal character was found after the NAME");
             }
         }
 
-        private Node ProcessBracket(int begin, int end)
+        /// <returns>The pair of head and tail of a linked list</returns>
+        private HeadTail ProcessBracket(int begin, int end)
         {
-            Node n;
             switch (end - begin)
             {
                 case 1: // () should in grammar check? TODO
                     throw new ArgumentException("The content between two paired bracket should not be empty");
                 case 2: // (word)
-                    n = MakeNewNode(_tokenList[begin + 1].Content);
-                    _nodes.Add(n);
-                    return n;
+                    return new HeadTail(MakeNewNode(_tokenList[begin + 1].Content));
                 default: // like (()[])
-                    var first = DoParseFrom(begin + 1);
-                    begin = FindPair(begin + 1);
+                    var e = FindPair(begin + 1);
+                    var first = DoParseFrom(begin + 1, e);
+                    var tail = first.Tail;
+                    begin = e;
 
-                    while (begin < end - 1) // (()Z)
+                    while (begin < end - 1)
                     {
-                        // there are some info lose between the two function
-                        n = DoParseFrom(begin + 1);
+                        begin = begin + 1;
+                        e = FindPair(begin);
+                        var current = DoParseFrom(begin, e);
 
-                        while (_nodeStack.Count != 0) // TODO should be moved to a method?
-                        {
-                            _nodeStack.Pop().AddChild(n); // error TODO should before DoParseFrom? it will affect?
-                        }
-                        //last.AddChild(n);
+                        tail.AddChild(current.Head);
+                        tail = current.Tail;
                         // update
-                        //last = n;
-                        begin = FindPair(begin + 1); // actually begin point to the last pair's end
+                        begin = e;
                     }
-                    return first; // or should return last
+
+                    return new HeadTail(first.Head, tail);
             }
         }
 
-        private Node ProcessSquareBracket(int begin, int end)
+        /// <returns>The pair of head and tail of a linked list</returns>
+        private HeadTail ProcessSquareBracket(int begin, int end)
         {
             switch (end - begin)
             {
                 case 1: // [] should in grammar check? TODO
                     throw new ArgumentException("The content between two paired bracket should not be empty");
                 case 2: // [word]
-                    return MakeNewNode(_tokenList[begin + 1].Content); // TODO should error?
+                    throw new ArgumentException("The content between two paired bracket should not be just one word directly");
                 default: // like [()[]]
-                    //var n = MakeNewNode("");
-                    var lastNodes = new List<Node>();
-                    while (_nodeStack.Count != 0)
-                    {
-                        lastNodes.Add(_nodeStack.Pop());
-                    }
-                    var lastNode = _nodeStack.Pop();
+                    var head = MakeNewNode("");
+                    var tail = MakeNewNode("");
+                    
                     while (begin < end - 1) // [()]
                     {
-                        var n = DoParseFrom(begin + 1);
+                        begin = begin + 1;
+                        var e = FindPair(begin);
+                        var current = DoParseFrom(begin, e);
+                        head.AddChild(current.Head);
+                        current.Tail.AddChild(tail);
 
-                        foreach (var last in lastNodes)
-                        {
-                            last.AddChild(n); // TODO maybe occur some problem
-                        }
-
-                        begin = FindPair(begin + 1); // actually begin point to the last pair's end
+                        // update
+                        begin = e;
                     }
-                    return lastNode;
+                    return new HeadTail(head, tail);
             }
         }
 
@@ -234,9 +224,12 @@ namespace ConfigureParser
 
         private Node MakeNewNode(string content)
         {
+            // use Linq to check if this content is existed in _node
             var n = new Node(content);
-            _nodes.Add(n);
-            _nodeStack.Push(n);
+            if (content != "")
+            {
+                _nodes.Add(n);
+            }
             return n;
         }
 
@@ -246,6 +239,26 @@ namespace ConfigureParser
                 .Replace("\n", " ")
                 .Replace("\t", " ")
                 .Replace("\r", " ");
+        }
+
+        /// <summary>
+        /// This class is to help code to be readable
+        /// </summary>
+        private class HeadTail
+        {
+            public Node Head { get; }
+            public Node Tail { get; }
+
+            public HeadTail(Node head, Node tail)
+            {
+                Head = head;
+                Tail = tail;
+            }
+
+            public HeadTail(Node onlyOne)
+            {
+                Head = Tail = onlyOne;
+            }
         }
 
     }

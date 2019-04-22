@@ -35,9 +35,8 @@ namespace ConfigureParser
                 //Trace.Assert(currentNode[1].Content == "AndMe");
                 //Trace.Assert(currentNode.ChildCount == 2);
                 //Debug.Assert();
-
                 var t = new OperationTree(code);
-                t.OperateTo("ViewAccount", new List<string> { "ViewAccount" });
+                t.OperateTo("ViewAccount", new List<int> { 0 });
                 Console.Read();
             }
         }
