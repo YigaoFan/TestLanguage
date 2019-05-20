@@ -1,0 +1,10 @@
+<PowerPointOptionWorkFlow>
+	<FirstStep>
+	</FirstStep>
+	<SecondStep>
+	</SecondStep>
+	<ThirdStep>
+	</ThirdStep>
+</PowerPointOptionWorkFlow>
+<!-- 每次都是在 XML 文件树里查找，然后读取对象当前状态比对，然后得出未执行的操作，再执行 -->
+<!-- 我可不可以每次只管用，想用哪个直接说，不用操心什么前置步骤，还有记录软件当前的状态（比如第一次打开和后面打开是不一样的 -->
